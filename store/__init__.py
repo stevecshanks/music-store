@@ -25,6 +25,6 @@ def create_app(test_config=None):
 
     from . import albums
     app.register_blueprint(albums.bp)
-    app.add_url_rule('/', endpoint='albums')
+    app.add_url_rule('/', endpoint='albums.index')
 
     return app
