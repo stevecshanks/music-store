@@ -10,6 +10,12 @@ def index():
     return render_template('albums/index.html', albums=albums)
 
 
+@bp.route('/purchased')
+def purchased():
+    albums = Album.query.filter_by(purchased=True).all()
+    return render_template('albums/index.html', albums=albums)
+
+
 @bp.route('/buy/<int:album_id>')
 def buy(album_id):
     album = Album.query.get(album_id)
@@ -22,5 +28,6 @@ def buy(album_id):
         db.session.add(album)
         db.session.commit()
         flash('Album purchased successfully!', 'success')
+        return redirect(url_for('albums.purchased'))
 
     return redirect(url_for('albums.index'))
