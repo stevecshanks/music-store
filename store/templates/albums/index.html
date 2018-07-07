@@ -43,6 +43,9 @@
 
       <div class="album py-5 bg-light">
         <div class="container">
+          {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+          {% endfor %}
 
           <div class="row">
             {% for album in albums %}

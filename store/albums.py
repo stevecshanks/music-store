@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, flash
 from store.models import Album, db
 
 bp = Blueprint('albums', __name__, url_prefix='/albums')
@@ -14,12 +14,13 @@ def index():
 def buy(album_id):
     album = Album.query.get(album_id)
     if not album:
-        raise ValueError('Album not found')
-    if album.purchased:
-        raise ValueError('You already own this album')
-
-    album.purchased = True
-    db.session.add(album)
-    db.session.commit()
+        flash('Album not found', 'danger')
+    elif album.purchased:
+        flash('You already own this album', 'warning')
+    else:
+        album.purchased = True
+        db.session.add(album)
+        db.session.commit()
+        flash('Album purchased successfully!', 'success')
 
     return redirect(url_for('albums.index'))
