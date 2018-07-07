@@ -8,7 +8,13 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
+        SQLALCHEMY_DATABASE_URI='sqlite:////tmp/test.db',
+        SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
+
+    from store.models import db, migrate
+    db.init_app(app)
+    migrate.init_app(app, db)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
