@@ -13,7 +13,13 @@ def index():
 @bp.route('/purchased')
 def purchased():
     albums = Album.query.filter_by(purchased=True).all()
-    return render_template('albums/index.html', albums=albums)
+    return render_template('albums/index.html', albums=albums, active_page='purchased')
+
+
+@bp.route('/unpurchased')
+def unpurchased():
+    albums = Album.query.filter_by(purchased=False).all()
+    return render_template('albums/index.html', albums=albums, active_page='unpurchased')
 
 
 @bp.route('/buy/<int:album_id>')
