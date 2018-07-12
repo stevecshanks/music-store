@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- Custom styles for this template -->
-    <link href="album.css" rel="stylesheet">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main.css') }}">
   </head>
 
   <body>
@@ -55,7 +55,7 @@
           <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <ul class="navbar-nav mr-auto">
               {% for id, href, name in navigation %}
-                <li class="nav-item {% if id == active_page %} active{% endif %}"><a href="{{ href }}" class="nav-link">{{ name }}</a></li>
+                <li class="nav-item {% if id == active_page %}active{% endif %}"><a href="{{ href }}" class="nav-link">{{ name }}</a></li>
               {% endfor %}
             </ul>
           </nav>
@@ -67,6 +67,11 @@
                   <img class="card-img-top" src="{{ album.cover_image_url }}" alt="Card image cap">
                   <div class="card-body">
                     <p class="card-text">
+                      <div class="rating">
+                        {% for i in range(1, 6) %}
+                          <a href="{{ url_for('albums.rate', album_id=album.id, rating=i) }}" class="rating-star {% if album.rating and i <= album.rating %}selected{% endif %}">&#9733;</a>
+                        {% endfor %}
+                      </div>
                       <h5>{{ album.artist }}</h5>
                       {{ album.name }}
                     </p>

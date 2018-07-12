@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from store.models import Album, db
 
 bp = Blueprint('albums', __name__, url_prefix='/albums')
@@ -35,5 +35,21 @@ def buy(album_id):
         db.session.commit()
         flash('Album purchased successfully!', 'success')
         return redirect(url_for('albums.purchased'))
+
+    return redirect(url_for('albums.index'))
+
+
+@bp.route('/rate/<int:album_id>')
+def rate(album_id):
+    album = Album.query.get(album_id)
+    if not album:
+        flash('Album not found', 'danger')
+    rating = request.args.get('rating', type=int)
+    if not rating or rating < 1 or rating > 5:
+        flash('Invalid rating', 'danger')
+    else:
+        album.rating = rating
+        db.session.add(album)
+        db.session.commit()
 
     return redirect(url_for('albums.index'))

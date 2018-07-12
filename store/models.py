@@ -13,3 +13,4 @@ class Album(db.Model):
     cover_image_url = db.Column(db.String(255), nullable=False)
     bandcamp_url = db.Column(db.String(255), nullable=False)
     purchased = db.Column(db.Boolean(), nullable=False, server_default=expression.false())
+    rating = db.Column(db.Integer)

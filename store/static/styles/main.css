@@ -1,0 +1,16 @@
+.rating {
+    float: right;
+}
+
+.rating-star {
+    color: #9fa8af;
+}
+
+.rating-star:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.rating-star.selected {
+    color: black;
+}
