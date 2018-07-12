@@ -68,7 +68,7 @@
                   <div class="card-body">
                     <p class="card-text">
                       <div class="rating">
-                        {% for i in range(1, 6) %}
+                        {% for i in range(5, 0, -1) %}
                           <a href="{{ url_for('albums.rate', album_id=album.id, rating=i) }}" class="rating-star {% if album.rating and i <= album.rating %}selected{% endif %}">&#9733;</a>
                         {% endfor %}
                       </div>

@@ -1,12 +1,13 @@
 .rating {
     float: right;
+    direction: rtl;
 }
 
 .rating-star {
     color: #9fa8af;
 }
 
-.rating-star:hover {
+.rating-star:hover, .rating-star:hover ~ .rating-star {
     color: black;
     text-decoration: none;
 }
