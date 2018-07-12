@@ -52,4 +52,4 @@ def rate(album_id):
         db.session.add(album)
         db.session.commit()
 
-    return redirect(url_for('albums.index'))
+    return redirect(request.referrer)
