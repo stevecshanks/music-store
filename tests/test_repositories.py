@@ -10,8 +10,8 @@ class TestAlbumRepository(unittest.TestCase):
         app.app_context().push()
         db.create_all(app=app)
 
-        self.album_1 = Album(id=1, artist='Test 1', name='Test 1', cover_image_url='', bandcamp_url='', purchased=True)
-        self.album_2 = Album(id=2, artist='Test 2', name='Test 2', cover_image_url='', bandcamp_url='')
+        self.album_1 = Album(artist='Test 1', name='Test 1', cover_image_url='', bandcamp_url='', purchased=True)
+        self.album_2 = Album(artist='Test 2', name='Test 2', cover_image_url='', bandcamp_url='')
 
         db.session.add(self.album_1)
         db.session.add(self.album_2)
