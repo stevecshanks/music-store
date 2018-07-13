@@ -14,3 +14,21 @@ class Album(db.Model):
     bandcamp_url = db.Column(db.String(255), nullable=False)
     purchased = db.Column(db.Boolean(), nullable=False, server_default=expression.false())
     rating = db.Column(db.Integer)
+
+    def purchase(self):
+        if self.purchased:
+            raise AlbumAlreadyPurchasedError()
+        self.purchased = True
+
+    def rate(self, rating):
+        if not rating or rating < 1 or rating > 5:
+            raise InvalidRatingError(f"Rating {rating} is invalid")
+        self.rating = rating
+
+
+class AlbumAlreadyPurchasedError(Exception):
+    pass
+
+
+class InvalidRatingError(Exception):
+    pass
