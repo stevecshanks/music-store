@@ -7,17 +7,17 @@ bp = Blueprint('albums', __name__, url_prefix='/albums')
 
 @bp.route('/')
 def index():
-    return render_template('albums/index.html', albums=AlbumRepository.get_all())
+    return display_albums(AlbumRepository.get_all())
 
 
 @bp.route('/purchased')
 def purchased():
-    return render_template('albums/index.html', albums=AlbumRepository.get_purchased(), active_page='purchased')
+    return display_albums(AlbumRepository.get_purchased())
 
 
 @bp.route('/unpurchased')
 def unpurchased():
-    return render_template('albums/index.html', albums=AlbumRepository.get_unpurchased(), active_page='unpurchased')
+    return display_albums(AlbumRepository.get_unpurchased())
 
 
 @bp.route('/buy/<int:album_id>')
@@ -53,3 +53,6 @@ def rate(album_id):
 
     return redirect(request.referrer)
 
+
+def display_albums(albums):
+    return render_template('albums/index.html', albums=albums)

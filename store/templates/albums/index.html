@@ -46,16 +46,15 @@
             <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
           {% endfor %}
 
-          {% set active_page = active_page|default('index') -%}
           {% set navigation = [
-            ('index', url_for('albums.index'), 'All'),
-            ('purchased', url_for('albums.purchased'), 'Purchased'),
-            ('unpurchased', url_for('albums.unpurchased'), 'Not Purchased'),
+            (url_for('albums.index'), 'All'),
+            (url_for('albums.purchased'), 'Purchased'),
+            (url_for('albums.unpurchased'), 'Not Purchased'),
           ] -%}
           <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <ul class="navbar-nav mr-auto">
-              {% for id, href, name in navigation %}
-                <li class="nav-item {% if id == active_page %}active{% endif %}"><a href="{{ href }}" class="nav-link">{{ name }}</a></li>
+              {% for href, name in navigation %}
+                <li class="nav-item {% if request.path == href %}active{% endif %}"><a href="{{ href }}" class="nav-link">{{ name }}</a></li>
               {% endfor %}
             </ul>
           </nav>
