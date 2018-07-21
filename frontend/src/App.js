@@ -5,6 +5,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
+    this.purchaseAlbum = this.purchaseAlbum.bind(this)
     this.state = {
       albums: [],
       albumFilter: null
@@ -34,6 +35,21 @@ class App extends Component {
     this.setState({albumFilter: albumFilter})
   }
 
+  purchaseAlbum = async (album) => {
+    const response = await fetch('/api/albums/' + album.id + '/buy');
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body)
+    }
+
+    this.setState((state, props) => {
+      const index = state.albums.findIndex((element, index, array) => element.id === album.id)
+      state.albums[index] = body
+      return state
+    });
+  }
+
   render() {
     return (
       <div>
@@ -42,7 +58,8 @@ class App extends Component {
           <div className="album py-2 bg-light">
             <div className="container">
               <FlashMessages/>
-              <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter} setAlbumFilter={this.setAlbumFilter}/>
+              <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter}
+                         setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}/>
             </div>
           </div>
         </main>
@@ -88,7 +105,7 @@ class AlbumList extends Component {
       albumsToDisplay = albumsToDisplay.filter(this.props.albumFilter)
     }
     const albums = albumsToDisplay.map((album =>
-      <Album key={album.id} album={album}/>
+      <Album key={album.id} album={album} purchaseAlbum={this.props.purchaseAlbum}/>
     ));
     return (
       <div>
@@ -137,7 +154,7 @@ class AlbumFilters extends Component {
 
 class FilterButton extends Component {
   render() {
-    const active = this.props.activeFilter == this.props.name ? 'active' : '';
+    const active = this.props.activeFilter === this.props.name ? 'active' : '';
     const className = 'nav-link ' + active;
     return (
       <li className="nav-item ">
@@ -148,13 +165,22 @@ class FilterButton extends Component {
 }
 
 class Album extends Component {
+  constructor(props) {
+    super(props);
+    this.handlePurchase = this.handlePurchase.bind(this)
+  }
+
+  handlePurchase() {
+    this.props.purchaseAlbum(this.props.album)
+  }
+
   render() {
     const album = this.props.album;
     let actionButton;
     if (album.purchased){
       actionButton = <a href="#" className="btn btn-sm btn-outline-secondary">Download</a>
     } else {
-      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary">Buy</a>
+      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary" onClick={this.handlePurchase}>Buy</a>
     }
     return (
       <div className="col-md-4">
