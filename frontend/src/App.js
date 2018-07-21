@@ -111,6 +111,12 @@ class AlbumFilters extends Component {
 class Album extends Component {
   render() {
     const album = this.props.album;
+    let actionButton;
+    if (album.purchased){
+      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary">Download</a>
+    } else {
+      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary">Buy</a>
+    }
     return (
       <div className="col-md-4">
         <div className="card mb-4 box-shadow">
@@ -123,8 +129,7 @@ class Album extends Component {
             </p>
             <div className="d-flex justify-content-between align-items-center">
               <div className="btn-group">
-                <a href="#" className="btn btn-sm btn-outline-secondary">Buy</a>
-                <a href="#" className="btn btn-sm btn-outline-secondary">Download</a>
+                {actionButton}
                 <a href={album.bandcamp_url} className="btn btn-sm btn-outline-secondary">Bandcamp</a>
               </div>
             </div>
