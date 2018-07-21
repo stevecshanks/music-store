@@ -2,9 +2,10 @@ import React, {Component} from 'react';
 import './App.css';
 
 class App extends Component {
-  state = {
-    albums: []
-  };
+  constructor(props) {
+    super(props);
+    this.state = {albums: []}
+  }
 
   componentDidMount() {
     this.callApi()
