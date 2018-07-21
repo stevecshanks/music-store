@@ -7,7 +7,6 @@ class App extends Component {
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.state = {
       albums: [],
-      displayedAlbums: [],
       albumFilter: null
     }
   }
@@ -16,7 +15,6 @@ class App extends Component {
     this.callApi()
       .then(response => this.setState({
         albums: response,
-        displayedAlbums: response,
       }))
       .catch(error => console.log(error));
   }
@@ -118,7 +116,7 @@ class AlbumFilters extends Component {
 
   updateFilter(e, filter) {
     this.props.setAlbumFilter(filter)
-    this.setState({activeFilter: e.name})
+    this.setState({activeFilter: e.target.innerHTML})
   };
 
   render() {
