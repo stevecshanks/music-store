@@ -4,12 +4,11 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.displayAll = this.displayAll.bind(this)
-    this.displayPurchased = this.displayPurchased.bind(this)
-    this.displayUnpurchased = this.displayUnpurchased.bind(this)
+    this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.state = {
       albums: [],
       displayedAlbums: [],
+      albumFilter: null
     }
   }
 
@@ -33,28 +32,8 @@ class App extends Component {
     return body;
   }
 
-  displayAll(e) {
-    this.setState((prevState, props) => {
-      return {
-        displayedAlbums: prevState.albums
-      }
-    });
-  }
-
-  displayPurchased(e) {
-    this.setState((prevState, props) => {
-      return {
-        displayedAlbums: prevState.albums.filter((album) => album.purchased)
-      }
-    });
-  }
-
-    displayUnpurchased(e) {
-    this.setState((prevState, props) => {
-      return {
-        displayedAlbums: prevState.albums.filter((album) => !album.purchased)
-      }
-    });
+  setAlbumFilter(albumFilter) {
+    this.setState({albumFilter: albumFilter})
   }
 
   render() {
@@ -65,8 +44,7 @@ class App extends Component {
           <div className="album py-2 bg-light">
             <div className="container">
               <FlashMessages/>
-              <AlbumList albums={this.state.displayedAlbums} displayAll={this.displayAll}
-                         displayPurchased={this.displayPurchased} displayUnpurchased={this.displayUnpurchased}/>
+              <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter} setAlbumFilter={this.setAlbumFilter}/>
             </div>
           </div>
         </main>
@@ -107,13 +85,16 @@ class Header extends Component {
 
 class AlbumList extends Component {
   render() {
-    const albums = this.props.albums.map((album =>
+    let albumsToDisplay = this.props.albums;
+    if (this.props.albumFilter) {
+      albumsToDisplay = albumsToDisplay.filter(this.props.albumFilter)
+    }
+    const albums = albumsToDisplay.map((album =>
       <Album key={album.id} album={album}/>
     ));
     return (
       <div>
-        <AlbumFilters displayAll={this.props.displayAll} displayPurchased={this.props.displayPurchased}
-                      displayUnpurchased={this.props.displayUnpurchased}/>
+        <AlbumFilters setAlbumFilter={this.props.setAlbumFilter}/>
         <div className="row">
           {albums}
         </div>
@@ -135,8 +116,8 @@ class AlbumFilters extends Component {
     activeFilter: 'All'
   }
 
-  handleClick(e, handler) {
-    handler()
+  updateFilter(e, filter) {
+    this.props.setAlbumFilter(filter)
     this.setState({activeFilter: e.name})
   };
 
@@ -145,11 +126,11 @@ class AlbumFilters extends Component {
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <ul className="navbar-nav mr-auto">
           <FilterButton activeFilter={this.state.activeFilter} name='All'
-                        handleClick={(e) => this.handleClick(e, this.props.displayAll)}/>
+                        handleClick={(e) => this.updateFilter(e, null)}/>
           <FilterButton activeFilter={this.state.activeFilter} name='Purchased'
-                        handleClick={(e) => this.handleClick(e, this.props.displayPurchased)}/>
+                        handleClick={(e) => this.updateFilter(e, (album) => album.purchased)}/>
           <FilterButton activeFilter={this.state.activeFilter} name='Unpurchased'
-                        handleClick={(e) => this.handleClick(e, this.props.displayUnpurchased)}/>
+                        handleClick={(e) => this.updateFilter(e, (album) => !album.purchased)}/>
         </ul>
       </nav>
     );
