@@ -4,12 +4,21 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {albums: []}
+    this.displayAll = this.displayAll.bind(this)
+    this.displayPurchased = this.displayPurchased.bind(this)
+    this.displayUnpurchased = this.displayUnpurchased.bind(this)
+    this.state = {
+      albums: [],
+      displayedAlbums: [],
+    }
   }
 
   componentDidMount() {
     this.callApi()
-      .then(response => this.setState({albums: response}))
+      .then(response => this.setState({
+        albums: response,
+        displayedAlbums: response,
+      }))
       .catch(error => console.log(error));
   }
 
@@ -21,7 +30,31 @@ class App extends Component {
       throw Error(body)
     }
 
-    return body
+    return body;
+  }
+
+  displayAll(e) {
+    this.setState((prevState, props) => {
+      return {
+        displayedAlbums: prevState.albums
+      }
+    });
+  }
+
+  displayPurchased(e) {
+    this.setState((prevState, props) => {
+      return {
+        displayedAlbums: prevState.albums.filter((album) => album.purchased)
+      }
+    });
+  }
+
+    displayUnpurchased(e) {
+    this.setState((prevState, props) => {
+      return {
+        displayedAlbums: prevState.albums.filter((album) => !album.purchased)
+      }
+    });
   }
 
   render() {
@@ -32,7 +65,8 @@ class App extends Component {
           <div className="album py-2 bg-light">
             <div className="container">
               <FlashMessages/>
-              <AlbumList albums={this.state.albums}/>
+              <AlbumList albums={this.state.displayedAlbums} displayAll={this.displayAll}
+                         displayPurchased={this.displayPurchased} displayUnpurchased={this.displayUnpurchased}/>
             </div>
           </div>
         </main>
@@ -78,7 +112,8 @@ class AlbumList extends Component {
     ));
     return (
       <div>
-        <AlbumFilters/>
+        <AlbumFilters displayAll={this.props.displayAll} displayPurchased={this.props.displayPurchased}
+                      displayUnpurchased={this.props.displayUnpurchased}/>
         <div className="row">
           {albums}
         </div>
@@ -96,16 +131,40 @@ class FlashMessages extends Component {
 }
 
 class AlbumFilters extends Component {
+  state = {
+    activeFilter: 'All'
+  }
+
+  handleClick(e, handler) {
+    handler()
+    this.setState({activeFilter: e.name})
+  };
+
   render() {
     return (
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <ul className="navbar-nav mr-auto">
-          <li className="nav-item active"><a href="#" className="nav-link">All</a></li>
-          <li className="nav-item"><a href="#" className="nav-link">Purchased</a></li>
-          <li className="nav-item "><a href="#" className="nav-link">Unpurchased</a></li>
+          <FilterButton activeFilter={this.state.activeFilter} name='All'
+                        handleClick={(e) => this.handleClick(e, this.props.displayAll)}/>
+          <FilterButton activeFilter={this.state.activeFilter} name='Purchased'
+                        handleClick={(e) => this.handleClick(e, this.props.displayPurchased)}/>
+          <FilterButton activeFilter={this.state.activeFilter} name='Unpurchased'
+                        handleClick={(e) => this.handleClick(e, this.props.displayUnpurchased)}/>
         </ul>
       </nav>
     );
+  }
+}
+
+class FilterButton extends Component {
+  render() {
+    const active = this.props.activeFilter == this.props.name ? 'active' : '';
+    const className = 'nav-link ' + active;
+    return (
+      <li className="nav-item ">
+        <a href="#" className={className} onClick={this.props.handleClick}>{this.props.name}</a>
+      </li>
+    )
   }
 }
 
