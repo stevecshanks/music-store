@@ -14,15 +14,21 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.callApi()
+    this.listAlbums()
       .then(response => this.setState({
         albums: response,
       }))
       .catch(error => console.log(error));
   }
 
-  callApi = async () => {
-    const response = await fetch('/api/albums');
+  callApi = async (endpoint, method = 'GET', json = null) => {
+    let init = {method: method}
+    if (json) {
+      init['body'] = JSON.stringify(json)
+      init['headers'] = {'Content-Type': 'application/json'}
+    }
+
+    const response = await fetch(endpoint, init);
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -32,47 +38,32 @@ class App extends Component {
     return body;
   }
 
-  setAlbumFilter(albumFilter) {
-    this.setState({albumFilter: albumFilter})
+  listAlbums = async () => {
+    return this.callApi('/api/albums')
   }
 
   purchaseAlbum = async (album) => {
-    const response = await fetch('/api/albums/' + album.id + '/buy');
-    const body = await response.json();
+    const response = await this.callApi('/api/albums/' + album.id + '/buy')
 
-    if (response.status !== 200) {
-      throw Error(body)
-    }
+    this.updateAlbumState(album, response)
+  }
 
+  rateAlbum = async (album, rating) => {
+    const response = await this.callApi('/api/albums/' + album.id + '/rate', 'PUT', {rating: rating})
+
+    this.updateAlbumState(album, response)
+  }
+
+  updateAlbumState(oldAlbum, updatedAlbum) {
     this.setState((state, props) => {
-      const index = state.albums.findIndex((element, index, array) => element.id === album.id)
-      state.albums[index] = body
+      const index = state.albums.findIndex((element, index, array) => element.id === oldAlbum.id)
+      state.albums[index] = updatedAlbum
       return state
     });
   }
 
-  rateAlbum = async (album, rating) => {
-    const response = await fetch(
-      '/api/albums/' + album.id + '/rate',
-      {
-        method: 'PUT',
-        body: JSON.stringify({rating: rating}),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body)
-    }
-
-    this.setState((state, props) => {
-      const index = state.albums.findIndex((element, index, array) => element.id === album.id)
-      state.albums[index] = body
-      return state
-    });
+  setAlbumFilter(albumFilter) {
+    this.setState({albumFilter: albumFilter})
   }
 
   render() {
