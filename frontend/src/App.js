@@ -6,6 +6,7 @@ class App extends Component {
     super(props);
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.purchaseAlbum = this.purchaseAlbum.bind(this)
+    this.rateAlbum = this.rateAlbum.bind(this)
     this.state = {
       albums: [],
       albumFilter: null
@@ -50,6 +51,30 @@ class App extends Component {
     });
   }
 
+  rateAlbum = async (album, rating) => {
+    const response = await fetch(
+      '/api/albums/' + album.id + '/rate',
+      {
+        method: 'PUT',
+        body: JSON.stringify({rating: rating}),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body)
+    }
+
+    this.setState((state, props) => {
+      const index = state.albums.findIndex((element, index, array) => element.id === album.id)
+      state.albums[index] = body
+      return state
+    });
+  }
+
   render() {
     return (
       <div>
@@ -59,7 +84,8 @@ class App extends Component {
             <div className="container">
               <FlashMessages/>
               <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter}
-                         setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}/>
+                         setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}
+                         rateAlbum={this.rateAlbum}/>
             </div>
           </div>
         </main>
@@ -105,7 +131,7 @@ class AlbumList extends Component {
       albumsToDisplay = albumsToDisplay.filter(this.props.albumFilter)
     }
     const albums = albumsToDisplay.map((album =>
-      <Album key={album.id} album={album} purchaseAlbum={this.props.purchaseAlbum}/>
+      <Album key={album.id} album={album} purchaseAlbum={this.props.purchaseAlbum} rateAlbum={this.props.rateAlbum}/>
     ));
     return (
       <div>
@@ -188,7 +214,7 @@ class Album extends Component {
           <img className="card-img-top" src={album.cover_image_url} alt="Card image cap"/>
           <div className="card-body">
             <p className="card-text">
-              <StarRating rating={album.rating}/>
+              <StarRating album={album} rateAlbum={this.props.rateAlbum}/>
               <h5>{album.artist}</h5>
               {album.name}
             </p>
@@ -206,11 +232,20 @@ class Album extends Component {
 }
 
 class StarRating extends Component {
+  constructor(props) {
+    super(props);
+    this.handleRating = this.handleRating.bind(this)
+  }
+
+  handleRating(rating) {
+    this.props.rateAlbum(this.props.album, rating)
+  }
+
   render() {
     const stars = [5, 4, 3, 2, 1].map((n) => {
-        const selected = n <= this.props.rating ? 'selected' : '';
+        const selected = n <= this.props.album.rating ? 'selected' : '';
         const className = "rating-star " + selected;
-        return <a href="#" className={className}>&#9733;</a>
+        return <a key={n} href="#" className={className} onClick={() => this.handleRating(n)}>&#9733;</a>
       }
     );
 

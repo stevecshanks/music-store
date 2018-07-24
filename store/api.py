@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint
+from flask import Blueprint, request
 from store.models import db
 from store.repositories import AlbumRepository
 
@@ -16,6 +16,18 @@ def albums():
 def buy(album_id):
     album = AlbumRepository.get_by_id(album_id)
     album.purchase()
+    db.session.add(album)
+    db.session.commit()
+
+    return json.dumps(album_to_dict(album))
+
+
+@bp.route('/albums/<int:album_id>/rate', methods=['PUT'])
+def rate(album_id):
+    rating = request.json.get('rating')
+
+    album = AlbumRepository.get_by_id(album_id)
+    album.rate(rating)
     db.session.add(album)
     db.session.commit()
 
