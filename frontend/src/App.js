@@ -8,6 +8,7 @@ class App extends Component {
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.purchaseAlbum = this.purchaseAlbum.bind(this)
     this.rateAlbum = this.rateAlbum.bind(this)
+    this.dismissFlashMessage = this.dismissFlashMessage.bind(this)
     this.state = {
       albums: [],
       albumFilter: null,
@@ -76,6 +77,14 @@ class App extends Component {
     });
   }
 
+  dismissFlashMessage(message) {
+    this.setState((state, props) => {
+      return {
+        messages: state.messages.filter((m) => m.id != message.id)
+      }
+    });
+  }
+
   setAlbumFilter(albumFilter) {
     this.setState({albumFilter: albumFilter})
   }
@@ -87,7 +96,7 @@ class App extends Component {
         <main role="main">
           <div className="album py-2 bg-light">
             <div className="container">
-              <FlashMessages messages={this.state.messages}/>
+              <FlashMessages messages={this.state.messages} dismissMessage={this.dismissFlashMessage}/>
               <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter}
                          setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}
                          rateAlbum={this.rateAlbum}/>
@@ -152,15 +161,22 @@ class AlbumList extends Component {
 class FlashMessages extends Component {
   render() {
     return this.props.messages.map((message =>
-      <FlashMessage key={message.id} type={message.type} text={message.text}/>
+      <FlashMessage key={message.id} message={message} dismissMessage={this.props.dismissMessage}/>
     ));
   }
 }
 
 class FlashMessage extends Component {
   render() {
-    const className = "alert alert-" + this.props.type;
-    return <div className={className} role="alert">{this.props.text}</div>
+    const message = this.props.message
+    const className = "alert alert-dismissible fade show alert-" + message.type;
+    return (
+      <div className={className} role="alert">{message.text}
+        <button type="button" className="close" aria-label="Close" onClick={() => this.props.dismissMessage(message)}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    )
   }
 }
 
