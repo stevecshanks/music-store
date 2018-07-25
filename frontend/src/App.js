@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+const uuid = require('uuid/v4')
 
 class App extends Component {
   constructor(props) {
@@ -9,7 +10,8 @@ class App extends Component {
     this.rateAlbum = this.rateAlbum.bind(this)
     this.state = {
       albums: [],
-      albumFilter: null
+      albumFilter: null,
+      messages: []
     }
   }
 
@@ -46,6 +48,7 @@ class App extends Component {
     const response = await this.callApi('/api/albums/' + album.id + '/buy')
 
     this.updateAlbumState(album, response)
+    this.addFlashMessage('success', 'Album purchased successfully!')
   }
 
   rateAlbum = async (album, rating) => {
@@ -62,6 +65,17 @@ class App extends Component {
     });
   }
 
+  addFlashMessage(type, text) {
+    this.setState((state, props) => {
+      const message = {
+        id: uuid(),
+        type: type,
+        text: text
+      }
+      return {messages: [...state.messages, message]}
+    });
+  }
+
   setAlbumFilter(albumFilter) {
     this.setState({albumFilter: albumFilter})
   }
@@ -73,7 +87,7 @@ class App extends Component {
         <main role="main">
           <div className="album py-2 bg-light">
             <div className="container">
-              <FlashMessages/>
+              <FlashMessages messages={this.state.messages}/>
               <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter}
                          setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}
                          rateAlbum={this.rateAlbum}/>
@@ -137,9 +151,16 @@ class AlbumList extends Component {
 
 class FlashMessages extends Component {
   render() {
-    return (
-      <div className="alert alert-warning" role="alert">a flash message</div>
-    );
+    return this.props.messages.map((message =>
+      <FlashMessage key={message.id} type={message.type} text={message.text}/>
+    ));
+  }
+}
+
+class FlashMessage extends Component {
+  render() {
+    const className = "alert alert-" + this.props.type;
+    return <div className={className} role="alert">{this.props.text}</div>
   }
 }
 
