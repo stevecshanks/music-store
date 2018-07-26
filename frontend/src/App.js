@@ -2,6 +2,10 @@ import React, {Component} from 'react';
 import './App.css';
 const uuid = require('uuid/v4')
 
+const FILTER_ALL_ALBUMS = null
+const FILTER_PURCHASED_ALBUMS = (album) => album.purchased
+const FILTER_UNPURCHASED_ALBUMS = (album) => !album.purchased
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -11,7 +15,7 @@ class App extends Component {
     this.dismissFlashMessage = this.dismissFlashMessage.bind(this)
     this.state = {
       albums: [],
-      albumFilter: null,
+      albumFilter: FILTER_ALL_ALBUMS,
       messages: []
     }
   }
@@ -50,6 +54,7 @@ class App extends Component {
 
     this.updateAlbumState(album, response)
     this.addFlashMessage('success', 'Album purchased successfully!')
+    this.setAlbumFilter(FILTER_PURCHASED_ALBUMS)
   }
 
   rateAlbum = async (album, rating) => {
@@ -149,7 +154,7 @@ class AlbumList extends Component {
     ));
     return (
       <div>
-        <AlbumFilters setAlbumFilter={this.props.setAlbumFilter}/>
+        <AlbumFilters albumFilter={this.props.albumFilter} setAlbumFilter={this.props.setAlbumFilter}/>
         <div className="row">
           {albums}
         </div>
@@ -181,25 +186,16 @@ class FlashMessage extends Component {
 }
 
 class AlbumFilters extends Component {
-  state = {
-    activeFilter: 'All'
-  }
-
-  updateFilter(e, filter) {
-    this.props.setAlbumFilter(filter)
-    this.setState({activeFilter: e.target.innerHTML})
-  };
-
   render() {
     return (
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <ul className="navbar-nav mr-auto">
-          <FilterButton activeFilter={this.state.activeFilter} name='All'
-                        handleClick={(e) => this.updateFilter(e, null)}/>
-          <FilterButton activeFilter={this.state.activeFilter} name='Purchased'
-                        handleClick={(e) => this.updateFilter(e, (album) => album.purchased)}/>
-          <FilterButton activeFilter={this.state.activeFilter} name='Unpurchased'
-                        handleClick={(e) => this.updateFilter(e, (album) => !album.purchased)}/>
+          <FilterButton filter={FILTER_ALL_ALBUMS} activeFilter={this.props.albumFilter} name='All'
+                        handleClick={this.props.setAlbumFilter}/>
+          <FilterButton filter={FILTER_PURCHASED_ALBUMS} activeFilter={this.props.albumFilter} name='Purchased'
+                        handleClick={this.props.setAlbumFilter}/>
+          <FilterButton filter={FILTER_UNPURCHASED_ALBUMS} activeFilter={this.props.albumFilter} name='Unpurchased'
+                        handleClick={this.props.setAlbumFilter}/>
         </ul>
       </nav>
     );
@@ -208,11 +204,11 @@ class AlbumFilters extends Component {
 
 class FilterButton extends Component {
   render() {
-    const active = this.props.activeFilter === this.props.name ? 'active' : '';
+    const active = this.props.activeFilter === this.props.filter ? 'active' : '';
     const className = 'nav-link ' + active;
     return (
       <li className="nav-item ">
-        <a href="#" className={className} onClick={this.props.handleClick}>{this.props.name}</a>
+        <a href="#" className={className} onClick={() => this.props.handleClick(this.props.filter)}>{this.props.name}</a>
       </li>
     )
   }
