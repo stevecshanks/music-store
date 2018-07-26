@@ -29,9 +29,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import albums, api
-    app.register_blueprint(albums.bp)
+    from . import api
     app.register_blueprint(api.bp)
-    app.add_url_rule('/', endpoint='albums.index')
+    app.add_url_rule('/', endpoint='api.albums')
 
     return app

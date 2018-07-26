@@ -32,11 +32,3 @@ class TestAlbumRepository(unittest.TestCase):
         self.assertEqual(len(albums), 2)
         self.assertTrue(self.album_1 in albums)
         self.assertTrue(self.album_2 in albums)
-
-    def test_purchased_albums_can_be_retrieved(self):
-        albums = AlbumRepository.get_purchased()
-        self.assertEqual(albums, [self.album_1])
-
-    def test_unpurchased_albums_can_be_retrieved(self):
-        albums = AlbumRepository.get_unpurchased()
-        self.assertEqual(albums, [self.album_2])

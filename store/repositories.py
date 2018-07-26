@@ -13,14 +13,6 @@ class AlbumRepository:
     def get_all():
         return Album.query.all()
 
-    @staticmethod
-    def get_purchased():
-        return Album.query.filter_by(purchased=True).all()
-
-    @staticmethod
-    def get_unpurchased():
-        return Album.query.filter_by(purchased=False).all()
-
 
 class AlbumNotFoundError(Exception):
     pass
