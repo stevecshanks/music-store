@@ -39,7 +39,7 @@ class App extends Component {
     const body = await response.json();
 
     if (response.status !== 200) {
-      throw Error(body)
+      throw Error(body['error'])
     }
 
     return body;
@@ -50,17 +50,25 @@ class App extends Component {
   }
 
   purchaseAlbum = async (album) => {
-    const response = await this.callApi('/api/albums/' + album.id + '/buy')
+    try {
+      const response = await this.callApi('/api/albums/' + album.id + '/buy')
 
-    this.updateAlbumState(album, response)
-    this.addFlashMessage('success', 'Album purchased successfully!')
-    this.setAlbumFilter(FILTER_PURCHASED_ALBUMS)
+      this.updateAlbumState(album, response)
+      this.addFlashMessage('success', 'Album purchased successfully!')
+      this.setAlbumFilter(FILTER_PURCHASED_ALBUMS)
+    } catch (err) {
+      this.addFlashMessage('danger', err.message)
+    }
   }
 
   rateAlbum = async (album, rating) => {
-    const response = await this.callApi('/api/albums/' + album.id + '/rate', 'PUT', {rating: rating})
+    try {
+      const response = await this.callApi('/api/albums/' + album.id + '/rate', 'PUT', {rating: rating})
 
-    this.updateAlbumState(album, response)
+      this.updateAlbumState(album, response)
+    } catch (err) {
+      this.addFlashMessage('danger', err.message)
+    }
   }
 
   updateAlbumState(oldAlbum, updatedAlbum) {

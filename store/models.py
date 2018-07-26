@@ -17,7 +17,7 @@ class Album(db.Model):
 
     def purchase(self):
         if self.purchased:
-            raise AlbumAlreadyPurchasedError()
+            raise AlbumAlreadyPurchasedError("You already own this album!")
         self.purchased = True
 
     def rate(self, rating):

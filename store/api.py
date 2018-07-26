@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, request
+from flask import Blueprint, request, Response
 from store.models import db
 from store.repositories import AlbumRepository
 
@@ -14,22 +14,28 @@ def albums():
 
 @bp.route('/albums/<int:album_id>/buy')
 def buy(album_id):
-    album = AlbumRepository.get_by_id(album_id)
-    album.purchase()
-    db.session.add(album)
-    db.session.commit()
+    try:
+        album = AlbumRepository.get_by_id(album_id)
+        album.purchase()
+        db.session.add(album)
+        db.session.commit()
 
-    return json.dumps(album_to_dict(album))
+        return json.dumps(album_to_dict(album))
+    except Exception as e:
+        return error_response(e)
 
 
 @bp.route('/albums/<int:album_id>/rate', methods=['PUT'])
 def rate(album_id):
-    rating = request.json.get('rating')
+    try:
+        rating = request.json.get('rating')
 
-    album = AlbumRepository.get_by_id(album_id)
-    album.rate(rating)
-    db.session.add(album)
-    db.session.commit()
+        album = AlbumRepository.get_by_id(album_id)
+        album.rate(rating)
+        db.session.add(album)
+        db.session.commit()
+    except Exception as e:
+        return error_response(e)
 
     return json.dumps(album_to_dict(album))
 
@@ -44,3 +50,7 @@ def album_to_dict(album):
         'purchased': album.purchased,
         'rating': album.rating
     }
+
+
+def error_response(exception):
+    return Response(json.dumps({'error': str(exception)}), 500)
