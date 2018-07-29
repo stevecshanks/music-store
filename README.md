@@ -15,10 +15,12 @@ A simple music store app to play around with Flask
 pip install -r requirements.txt
 export FLASK_APP=store
 flask db upgrade
+
 # If you have a Bandcamp account:
-    python seed_db_from_bandcamp.py
+python seed_db_from_bandcamp.py
 # If you don't:
-    python seed_db.py
+python seed_db.py
+
 flask run
 ```
 
