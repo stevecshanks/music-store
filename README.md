@@ -28,5 +28,6 @@ flask run
 
 ```shell
 cd frontend
+npm install
 npm start
 ```
