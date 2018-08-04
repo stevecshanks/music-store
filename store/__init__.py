@@ -31,6 +31,5 @@ def create_app(test_config=None):
 
     from . import api
     app.register_blueprint(api.bp)
-    app.add_url_rule('/', endpoint='api.albums')
 
     return app
