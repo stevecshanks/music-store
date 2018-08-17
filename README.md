@@ -9,24 +9,15 @@ A simple music store app to play around with Flask
 
 ## Setup
 
-### Backend
-
 ```shell
-pip install -r requirements.txt
-export FLASK_APP=store
+docker-compose up -d
+
+docker exec -it store-app bash
+
 flask db upgrade
 
 # If you have a Bandcamp account:
 python seed_db_from_bandcamp.py
 # If you don't:
 python seed_db.py
-
-flask run
-```
-
-### Frontend
-
-```shell
-cd frontend
-npm start
 ```
