@@ -1,6 +1,7 @@
 version: "2"
 services:
   app:
+    container_name: store-app
     build: .
     depends_on:
       - db
@@ -12,6 +13,7 @@ services:
     volumes:
       - .:/app
   db:
+    container_name: store-db
     image: mysql:5.7
     ports:
       - "3306:3306"
@@ -19,6 +21,7 @@ services:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=store
   frontend:
+    container_name: store-frontend
     build:
       context: frontend
     depends_on:
