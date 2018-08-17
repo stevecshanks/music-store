@@ -6,6 +6,9 @@ services:
       - db
     ports:
       - "5000:5000"
+    environment:
+      - FLASK_APP=store
+      - FLASK_ENV=development
     volumes:
       - .:/app
   db:
