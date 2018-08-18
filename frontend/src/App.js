@@ -93,7 +93,7 @@ class App extends Component {
   dismissFlashMessage(message) {
     this.setState((state, props) => {
       return {
-        messages: state.messages.filter((m) => m.id != message.id)
+        messages: state.messages.filter((m) => m.id !== message.id)
       }
     });
   }
