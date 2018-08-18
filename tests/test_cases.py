@@ -27,3 +27,12 @@ class ApiTestCase(AppTestCase):
 
     def assertResponseEqualsJson(self, response, expected):
         self.assertEqual(json.loads(response.get_data(as_text=True)), expected)
+
+    def get(self, url):
+        return self.client.get(url)
+
+    def put(self, url, data=None):
+        return self.client.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+
+    def post(self, url, data=None):
+        return self.client.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
