@@ -51,7 +51,7 @@ class App extends Component {
 
   purchaseAlbum = async (album) => {
     try {
-      const response = await this.callApi('/api/albums/' + album.id + '/buy')
+      const response = await this.callApi('/api/albums/' + album.id + '/purchase', 'POST')
 
       this.updateAlbumState(album, response)
       this.addFlashMessage('success', 'Album purchased successfully!')
@@ -63,7 +63,7 @@ class App extends Component {
 
   rateAlbum = async (album, rating) => {
     try {
-      const response = await this.callApi('/api/albums/' + album.id + '/rate', 'PUT', {rating: rating})
+      const response = await this.callApi('/api/albums/' + album.id + '/rating', 'PUT', {rating: rating})
 
       this.updateAlbumState(album, response)
     } catch (err) {

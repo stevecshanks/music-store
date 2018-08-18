@@ -12,7 +12,7 @@ def list_albums():
     return json.dumps([album_to_dict(album) for album in AlbumRepository.get_all()])
 
 
-@bp.route('/albums/<int:album_id>/buy')
+@bp.route('/albums/<int:album_id>/purchase', methods=['POST'])
 def purchase_album(album_id):
     try:
         album = AlbumRepository.get_by_id(album_id)
@@ -25,7 +25,7 @@ def purchase_album(album_id):
         return error_response(e)
 
 
-@bp.route('/albums/<int:album_id>/rate', methods=['PUT'])
+@bp.route('/albums/<int:album_id>/rating', methods=['PUT'])
 def rate_album(album_id):
     try:
         rating = request.json.get('rating')

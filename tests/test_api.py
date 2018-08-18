@@ -42,7 +42,7 @@ class AlbumsTest(ApiTestCase):
                                        'rating': 5})
 
     def test_purchasing_non_existent_album_returns_correct_error(self):
-        response = self.client.get(url_for('api.purchase_album', album_id=999))
+        response = self.client.post(url_for('api.purchase_album', album_id=999))
         self.assertEqual(response.status_code, 500)
         self.assertResponseEqualsJson(response, {'error': 'No album found with id 999'})
 
@@ -51,7 +51,7 @@ class AlbumsTest(ApiTestCase):
         db.session.add(album)
         db.session.commit()
 
-        response = self.client.get(url_for('api.purchase_album', album_id=album.id))
+        response = self.client.post(url_for('api.purchase_album', album_id=album.id))
         self.assertEqual(response.status_code, 200)
         self.assertResponseEqualsJson(response,
                                       {'id': album.id, 'artist': 'Test Artist', 'name': 'Test',
