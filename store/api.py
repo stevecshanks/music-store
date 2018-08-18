@@ -1,8 +1,8 @@
 import json
 
 from flask import Blueprint, request, Response
-from store.models import db
-from store.repositories import AlbumRepository
+from store.models import db, InvalidRatingError,AlbumAlreadyPurchasedError
+from store.repositories import AlbumRepository, AlbumNotFoundError
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -21,8 +21,10 @@ def purchase_album(album_id):
         db.session.commit()
 
         return json.dumps(album_to_dict(album))
-    except Exception as e:
-        return error_response(e)
+    except AlbumNotFoundError as e:
+        return error_response(e, 404)
+    except AlbumAlreadyPurchasedError as e:
+        return error_response(e, 400)
 
 
 @bp.route('/albums/<int:album_id>/rating', methods=['PUT'])
@@ -34,8 +36,10 @@ def rate_album(album_id):
         album.rate(rating)
         db.session.add(album)
         db.session.commit()
-    except Exception as e:
-        return error_response(e)
+    except AlbumNotFoundError as e:
+        return error_response(e, 404)
+    except InvalidRatingError as e:
+        return error_response(e, 400)
 
     return json.dumps(album_to_dict(album))
 
@@ -52,5 +56,5 @@ def album_to_dict(album):
     }
 
 
-def error_response(exception):
-    return Response(json.dumps({'error': str(exception)}), 500)
+def error_response(exception, status_code):
+    return Response(json.dumps({'error': str(exception)}), status_code)
