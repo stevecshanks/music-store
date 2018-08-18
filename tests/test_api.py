@@ -4,7 +4,7 @@ from flask import url_for
 from store.models import db, Album
 
 
-class AlbumsTest(ApiTestCase):
+class TestAlbums(ApiTestCase):
     def test_empty_list_returned_if_no_albums_in_database(self):
         response = self.client.get(url_for('api.list_albums'))
         self.assertEqual(response.status_code, 200)
