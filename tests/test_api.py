@@ -11,16 +11,11 @@ class TestAlbums(ApiTestCase):
         self.assertResponseEqualsJson(response, [])
 
     def test_album_json_is_returned_correctly(self):
-        album = Album(artist='Test Artist', name='Test', cover_image_url='a url', bandcamp_url='another url', rating=1)
-        db.session.add(album)
-        db.session.commit()
+        album = self._create_test_album()
 
         response = self.client.get(url_for('api.list_albums'))
         self.assertEqual(response.status_code, 200)
-        self.assertResponseEqualsJson(response,
-                                      [{'id': album.id, 'artist': 'Test Artist', 'name': 'Test',
-                                        'cover_image_url': 'a url', 'bandcamp_url': 'another url', 'purchased': False,
-                                        'rating': 1}])
+        self.assertResponseEqualsJson(response, [self._expected_json(album)])
 
     def test_rating_non_existent_album_returns_correct_error(self):
         response = self.client.put(url_for('api.rate_album', album_id=999), data=json.dumps({'rating': 1}),
@@ -29,9 +24,7 @@ class TestAlbums(ApiTestCase):
         self.assertResponseEqualsJson(response, {'error': 'No album found with id 999'})
 
     def test_invalid_rating_returns_correct_error(self):
-        album = Album(artist='Test Artist', name='Test', cover_image_url='a url', bandcamp_url='another url', rating=1)
-        db.session.add(album)
-        db.session.commit()
+        album = self._create_test_album()
 
         response = self.client.put(url_for('api.rate_album', album_id=album.id), data=json.dumps({'rating': 99}),
                                    headers={'Content-Type': 'application/json'})
@@ -39,17 +32,12 @@ class TestAlbums(ApiTestCase):
         self.assertResponseEqualsJson(response, {'error': 'Rating 99 is invalid'})
 
     def test_rating_an_album_correctly_returns_the_updated_album(self):
-        album = Album(artist='Test Artist', name='Test', cover_image_url='a url', bandcamp_url='another url', rating=1)
-        db.session.add(album)
-        db.session.commit()
+        album = self._create_test_album(rating=1)
 
         response = self.client.put(url_for('api.rate_album', album_id=album.id), data=json.dumps({'rating': 5}),
                                    headers={'Content-Type': 'application/json'})
         self.assertEqual(response.status_code, 200)
-        self.assertResponseEqualsJson(response,
-                                      {'id': album.id, 'artist': 'Test Artist', 'name': 'Test',
-                                       'cover_image_url': 'a url', 'bandcamp_url': 'another url', 'purchased': False,
-                                       'rating': 5})
+        self.assertResponseEqualsJson(response, self._expected_json(album, rating=5))
 
     def test_purchasing_non_existent_album_returns_correct_error(self):
         response = self.client.post(url_for('api.purchase_album', album_id=999))
@@ -57,23 +45,31 @@ class TestAlbums(ApiTestCase):
         self.assertResponseEqualsJson(response, {'error': 'No album found with id 999'})
 
     def test_purchasing_the_same_album_twice_returns_correct_error(self):
-        album = Album(artist='Test Artist', name='Test', cover_image_url='a url', bandcamp_url='another url', rating=1,
-                      purchased=True)
-        db.session.add(album)
-        db.session.commit()
+        album = self._create_test_album(purchased=True)
 
         response = self.client.post(url_for('api.purchase_album', album_id=album.id))
         self.assertEqual(response.status_code, 400)
         self.assertResponseEqualsJson(response, {'error': 'Album has already been purchased'})
 
     def test_purchasing_an_album_correctly_returns_the_updated_album(self):
-        album = Album(artist='Test Artist', name='Test', cover_image_url='a url', bandcamp_url='another url')
-        db.session.add(album)
-        db.session.commit()
+        album = self._create_test_album()
 
         response = self.client.post(url_for('api.purchase_album', album_id=album.id))
         self.assertEqual(response.status_code, 200)
-        self.assertResponseEqualsJson(response,
-                                      {'id': album.id, 'artist': 'Test Artist', 'name': 'Test',
-                                       'cover_image_url': 'a url', 'bandcamp_url': 'another url', 'purchased': True,
-                                       'rating': None})
+        self.assertResponseEqualsJson(response, self._expected_json(album, purchased=True))
+
+    @staticmethod
+    def _create_test_album(**kwargs):
+        defaults = {'artist': 'Test Artist', 'name': 'Test', 'cover_image_url': 'a url', 'bandcamp_url': 'another url'}
+        album = Album(**defaults, **kwargs)
+        db.session.add(album)
+        db.session.commit()
+
+        return album
+
+    @staticmethod
+    def _expected_json(album, **kwargs):
+        defaults = {'id': album.id, 'artist': album.artist, 'name': album.name,
+                    'cover_image_url': album.cover_image_url, 'bandcamp_url': album.bandcamp_url,
+                    'purchased': album.purchased, 'rating': album.rating}
+        return {**defaults, **kwargs}
