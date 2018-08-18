@@ -49,6 +49,25 @@ class TestAlbums(ApiTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertResponseEqualsJson(response, self._expected_json(album, purchased=True))
 
+    def test_downloads_cannot_be_created_for_non_existent_albums(self):
+        response = self.post(url_for('api.download_album', album_id=999))
+        self.assertEqual(response.status_code, 404)
+        self.assertResponseEqualsJson(response, {'error': 'No album found with id 999'})
+
+    def test_downloads_cannot_be_created_for_unpurchased_albums(self):
+        album = self._create_test_album()
+        response = self.post(url_for('api.download_album', album_id=album.id))
+        self.assertEqual(response.status_code, 400)
+        self.assertResponseEqualsJson(response, {'error': 'Cannot download an unpurchased album'})
+
+    def test_downloads_can_be_created(self):
+        album = self._create_test_album(purchased=True)
+        response = self.post(url_for('api.download_album', album_id=album.id))
+        self.assertEqual(response.status_code, 200)
+
+        json = self.response_as_json(response)
+        self.assertIsNotNone(json.get('id'))
+
     @staticmethod
     def _create_test_album(**overrides):
         defaults = {'artist': 'Test Artist', 'name': 'Test', 'cover_image_url': 'a url', 'bandcamp_url': 'another url'}

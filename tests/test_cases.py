@@ -26,7 +26,11 @@ class ApiTestCase(AppTestCase):
         self.client = self.app.test_client()
 
     def assertResponseEqualsJson(self, response, expected):
-        self.assertEqual(json.loads(response.get_data(as_text=True)), expected)
+        self.assertEqual(self.response_as_json(response), expected)
+
+    @staticmethod
+    def response_as_json(response):
+        return json.loads(response.get_data(as_text=True))
 
     def get(self, url):
         return self.client.get(url)

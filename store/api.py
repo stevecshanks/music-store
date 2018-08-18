@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from flask import Blueprint, request, Response
 from store.models import db, InvalidRatingError,AlbumAlreadyPurchasedError
@@ -42,6 +43,19 @@ def rate_album(album_id):
         return error_response(e, 400)
 
     return json.dumps(album_to_dict(album))
+
+
+@bp.route('/albums/<int:album_id>/downloads', methods=['POST'])
+def download_album(album_id):
+    try:
+        album = AlbumRepository.get_by_id(album_id)
+        if not album.purchased:
+            raise PermissionError('Cannot download an unpurchased album')
+        return json.dumps({'id': str(uuid.uuid4())})
+    except AlbumNotFoundError as e:
+        return error_response(e, 404)
+    except PermissionError as e:
+        return error_response(e, 400)
 
 
 def album_to_dict(album):

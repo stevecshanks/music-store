@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+
 const uuid = require('uuid/v4')
 
 const FILTER_ALL_ALBUMS = null
@@ -11,12 +12,14 @@ class App extends Component {
     super(props);
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.purchaseAlbum = this.purchaseAlbum.bind(this)
+    this.downloadAlbum = this.downloadAlbum.bind(this)
     this.rateAlbum = this.rateAlbum.bind(this)
     this.dismissFlashMessage = this.dismissFlashMessage.bind(this)
     this.state = {
       albums: [],
       albumFilter: FILTER_ALL_ALBUMS,
-      messages: []
+      messages: [],
+      downloads: [],
     }
   }
 
@@ -56,6 +59,22 @@ class App extends Component {
       this.updateAlbumState(album, response)
       this.addFlashMessage('success', 'Album purchased successfully!')
       this.setAlbumFilter(FILTER_PURCHASED_ALBUMS)
+    } catch (err) {
+      this.addFlashMessage('danger', err.message)
+    }
+  }
+
+  downloadAlbum = async (album) => {
+    try {
+      const response = await this.callApi('/api/albums/' + album.id + '/downloads', 'POST')
+
+      this.setState((state, props) => {
+        const download = {
+          id: response['id'],
+          album: album,
+        }
+        return {downloads: [...state.downloads, download]}
+      });
     } catch (err) {
       this.addFlashMessage('danger', err.message)
     }
@@ -105,14 +124,14 @@ class App extends Component {
   render() {
     return (
       <div>
-        <Header/>
+        <Header downloads={this.state.downloads}/>
         <main role="main">
           <div className="album py-2 bg-light">
             <div className="container">
               <FlashMessages messages={this.state.messages} dismissMessage={this.dismissFlashMessage}/>
               <AlbumList albums={this.state.albums} albumFilter={this.state.albumFilter}
                          setAlbumFilter={this.setAlbumFilter} purchaseAlbum={this.purchaseAlbum}
-                         rateAlbum={this.rateAlbum}/>
+                         downloadAlbum={this.downloadAlbum} rateAlbum={this.rateAlbum}/>
             </div>
           </div>
         </main>
@@ -135,7 +154,7 @@ class Header extends Component {
             </div>
           </div>
         </div>
-        <div className="navbar navbar-dark bg-dark box-shadow">
+        <div className="navbar navbar-expand-lg navbar-dark bg-dark box-shadow">
           <div className="container d-flex justify-content-between">
             <a href="/" className="navbar-brand d-flex align-items-center">
               <strong>Music Store</strong>
@@ -144,9 +163,49 @@ class Header extends Component {
                     aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
               <span className="navbar-toggler-icon"/>
             </button>
+            <div className="collapse navbar-collapse" id="navbarNavDropdown">
+              <ul className="navbar-nav">
+                <DownloadList downloads={this.props.downloads}/>
+              </ul>
+            </div>
           </div>
         </div>
       </header>
+    );
+  }
+}
+
+class DownloadList extends Component {
+  render() {
+    if (this.props.downloads.length === 0) {
+      return ''
+    }
+
+    const downloadsToDisplay = this.props.downloads.map((download) =>
+      <Download key={download.id} album={download.album}/>
+    );
+
+    return (
+      <li className="nav-item dropdown">
+        <a className="nav-link dropdown-toggle" href="#" id="downloadListMenuLink" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+          Downloads <span className="badge badge-warning">{this.props.downloads.length}</span>
+        </a>
+        <div className="dropdown-menu" aria-labelledby="downloadListMenuLink">
+          {downloadsToDisplay}
+        </div>
+      </li>
+    );
+  }
+}
+
+class Download extends Component {
+  render() {
+    const album = this.props.album;
+    return (
+      <a className="dropdown-item" href="#">
+        <span className="badge badge-warning">Pending</span> {album.artist} - {album.name}
+      </a>
     );
   }
 }
@@ -158,7 +217,8 @@ class AlbumList extends Component {
       albumsToDisplay = albumsToDisplay.filter(this.props.albumFilter)
     }
     const albums = albumsToDisplay.map((album =>
-      <Album key={album.id} album={album} purchaseAlbum={this.props.purchaseAlbum} rateAlbum={this.props.rateAlbum}/>
+        <Album key={album.id} album={album} purchaseAlbum={this.props.purchaseAlbum}
+               downloadAlbum={this.props.downloadAlbum} rateAlbum={this.props.rateAlbum}/>
     ));
     return (
       <div>
@@ -174,7 +234,7 @@ class AlbumList extends Component {
 class FlashMessages extends Component {
   render() {
     return this.props.messages.map((message =>
-      <FlashMessage key={message.id} message={message} dismissMessage={this.props.dismissMessage}/>
+        <FlashMessage key={message.id} message={message} dismissMessage={this.props.dismissMessage}/>
     ));
   }
 }
@@ -216,7 +276,8 @@ class FilterButton extends Component {
     const className = 'nav-link ' + active;
     return (
       <li className="nav-item ">
-        <a href="#" className={className} onClick={() => this.props.handleClick(this.props.filter)}>{this.props.name}</a>
+        <a href="#" className={className}
+           onClick={() => this.props.handleClick(this.props.filter)}>{this.props.name}</a>
       </li>
     )
   }
@@ -226,19 +287,27 @@ class Album extends Component {
   constructor(props) {
     super(props);
     this.handlePurchase = this.handlePurchase.bind(this)
+    this.handleDownload = this.handleDownload.bind(this)
   }
 
   handlePurchase() {
     this.props.purchaseAlbum(this.props.album)
   }
 
+  handleDownload(e) {
+    this.props.downloadAlbum(this.props.album)
+    e.target.innerText = 'Added to Downloads'
+    e.target.disabled = true
+  }
+
   render() {
     const album = this.props.album;
     let actionButton;
-    if (album.purchased){
-      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary">Download</a>
+    if (album.purchased) {
+      actionButton = <button className="btn btn-sm btn-outline-secondary"
+                             onClick={(e) => this.handleDownload(e)}>Download</button>
     } else {
-      actionButton = <a href="#" className="btn btn-sm btn-outline-secondary" onClick={this.handlePurchase}>Buy</a>
+      actionButton = <button className="btn btn-sm btn-outline-secondary" onClick={this.handlePurchase}>Buy</button>
     }
     return (
       <div className="col-md-4">
