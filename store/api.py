@@ -2,8 +2,10 @@ import json
 import uuid
 
 from flask import Blueprint, request, Response
-from store.models import db, InvalidRatingError,AlbumAlreadyPurchasedError
+
+from store.models import db, InvalidRatingError, AlbumAlreadyPurchasedError
 from store.repositories import AlbumRepository, AlbumNotFoundError
+from store.services import DownloadService, AlbumNotPurchasedError
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -49,12 +51,12 @@ def rate_album(album_id):
 def download_album(album_id):
     try:
         album = AlbumRepository.get_by_id(album_id)
-        if not album.purchased:
-            raise PermissionError('Cannot download an unpurchased album')
-        return json.dumps({'id': str(uuid.uuid4())})
+        download_service = DownloadService()
+        pending_download = download_service.request_download(album)
+        return json.dumps({'id': pending_download.id})
     except AlbumNotFoundError as e:
         return error_response(e, 404)
-    except PermissionError as e:
+    except AlbumNotPurchasedError as e:
         return error_response(e, 400)
 
 
