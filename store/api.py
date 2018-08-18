@@ -8,12 +8,12 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 
 
 @bp.route('/albums')
-def albums():
+def list_albums():
     return json.dumps([album_to_dict(album) for album in AlbumRepository.get_all()])
 
 
 @bp.route('/albums/<int:album_id>/buy')
-def buy(album_id):
+def purchase_album(album_id):
     try:
         album = AlbumRepository.get_by_id(album_id)
         album.purchase()
@@ -26,7 +26,7 @@ def buy(album_id):
 
 
 @bp.route('/albums/<int:album_id>/rate', methods=['PUT'])
-def rate(album_id):
+def rate_album(album_id):
     try:
         rating = request.json.get('rating')
 
