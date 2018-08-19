@@ -1,11 +1,12 @@
 import json
-import uuid
+from rq import Connection, Queue
 
 from flask import Blueprint, request, Response
 
 from store.models import db, InvalidRatingError, AlbumAlreadyPurchasedError
 from store.repositories import AlbumRepository, AlbumNotFoundError
-from store.services import DownloadService, AlbumNotPurchasedError
+from store.services import DownloadService, AlbumNotPurchasedError, DownloadQueueFactory
+
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -51,9 +52,10 @@ def rate_album(album_id):
 def download_album(album_id):
     try:
         album = AlbumRepository.get_by_id(album_id)
-        download_service = DownloadService()
-        pending_download = download_service.request_download(album)
-        return json.dumps({'id': pending_download.id})
+        with Connection(DownloadQueueFactory.create()):
+            download_service = DownloadService(Queue())
+            pending_download = download_service.request_download(album)
+            return json.dumps({'id': pending_download.id})
     except AlbumNotFoundError as e:
         return error_response(e, 404)
     except AlbumNotPurchasedError as e:

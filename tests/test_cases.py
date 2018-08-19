@@ -9,6 +9,7 @@ class AppTestCase(unittest.TestCase):
         self.app = store.create_app(test_config={
             'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
             'SERVER_NAME': '{rv}.localdomain',
+            'REDIS_URL': None,
         })
         self.app_context = self.app.app_context()
         self.app_context.push()

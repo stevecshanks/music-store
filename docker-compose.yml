@@ -5,6 +5,7 @@ services:
     build: .
     depends_on:
       - db
+      - redis
     ports:
       - "5000:5000"
     environment:
@@ -33,3 +34,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+  redis:
+    container_name: store-redis
+    image: redis:4.0.11

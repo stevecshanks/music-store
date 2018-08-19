@@ -1,5 +1,4 @@
 import os
-
 from flask import Flask
 
 
@@ -9,7 +8,9 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://root:root@db/store',
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        REDIS_URL='redis://store-redis:6379/0',
+        REDIS_QUEUES=['default'],
     )
 
     from store.models import db, migrate
