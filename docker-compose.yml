@@ -2,6 +2,7 @@ version: "2"
 services:
   app:
     container_name: store-app
+    image: app
     build: .
     depends_on:
       - db
@@ -37,3 +38,14 @@ services:
   redis:
     container_name: store-redis
     image: redis:4.0.11
+  download-worker:
+    container_name: store-download-worker
+    image: app
+    command: python download_worker.py
+    depends_on:
+      - redis
+    environment:
+      - FLASK_APP=store
+      - FLASK_ENV=development
+    volumes:
+      - .:/app

@@ -1,5 +1,7 @@
 import fakeredis
+import random
 import redis
+import time
 import uuid
 from collections import namedtuple
 from flask import current_app
@@ -13,16 +15,17 @@ class DownloadService:
         if not album.purchased:
             raise AlbumNotPurchasedError('Cannot download an unpurchased album')
         pending_download = PendingDownload(str(uuid.uuid4()))
-        self.queue.enqueue(self.process_download, pending_download)
+        self.queue.enqueue(process_download, pending_download)
         return pending_download
-
-    @staticmethod
-    def process_download(pending_download):
-        # Don't actually care about doing any real work here
-        return True
 
 
 PendingDownload = namedtuple('PendingDownload', ['id'])
+
+
+def process_download(pending_download):
+    # Don't actually care about doing any real work here, but look like we are...
+    time.sleep(random.randint(5, 10))
+    return True
 
 
 class AlbumNotPurchasedError(Exception):

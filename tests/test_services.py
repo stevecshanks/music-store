@@ -1,6 +1,6 @@
 import unittest
 from store.models import Album
-from store.services import DownloadService, AlbumNotPurchasedError
+from store.services import DownloadService, AlbumNotPurchasedError, process_download
 from unittest.mock import patch
 
 
@@ -22,4 +22,4 @@ class TestDownloadService(unittest.TestCase):
         album = Album(purchased=True)
         download_service = DownloadService(queue)
         pending_download = download_service.request_download(album)
-        queue.enqueue.assert_called_once_with(DownloadService.process_download, pending_download)
+        queue.enqueue.assert_called_once_with(process_download, pending_download)
