@@ -12,7 +12,7 @@ A simple music store app to play around with Flask
 ```shell
 docker-compose up -d
 
-docker exec -it store-app bash
+docker-compose exec app bash
 
 flask db upgrade
 
@@ -21,3 +21,5 @@ python seed_db_from_bandcamp.py
 # If you don't:
 python seed_db.py
 ```
+
+Browse to http://localhost:3000/ to access the app.

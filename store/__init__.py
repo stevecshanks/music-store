@@ -9,7 +9,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://root:root@db/store',
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        REDIS_URL='redis://store-redis:6379/0',
+        REDIS_URL='redis://redis:6379/0',
         REDIS_QUEUES=['default'],
     )
 

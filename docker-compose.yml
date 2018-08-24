@@ -1,7 +1,6 @@
 version: "2"
 services:
   app:
-    container_name: store-app
     image: app
     build: .
     depends_on:
@@ -15,7 +14,6 @@ services:
     volumes:
       - .:/app
   db:
-    container_name: store-db
     image: mysql:5.7
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
@@ -24,7 +22,6 @@ services:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=store
   frontend:
-    container_name: store-frontend
     build:
       context: frontend
     depends_on:
@@ -36,10 +33,8 @@ services:
       - ./frontend:/app
       - /app/node_modules
   redis:
-    container_name: store-redis
     image: redis:4.0.11
   download-worker:
-    container_name: store-download-worker
     image: app
     command: python download_worker.py
     depends_on:
