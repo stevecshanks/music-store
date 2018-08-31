@@ -78,6 +78,7 @@ class App extends Component {
         const download = {
           id: response['id'],
           album: album,
+          status: 'pending',
         }
         return {downloads: [...state.downloads, download]}
       });
@@ -87,7 +88,13 @@ class App extends Component {
   }
 
   markDownloadAsReady(download_id) {
-    console.log("Download ready:", download_id)
+    this.setState((state, props) => {
+      const index = state.downloads.findIndex((element, index, array) => element.id === download_id)
+      if (index !== -1) {
+        state.downloads[index].status = 'ready'
+      }
+      return state
+    });
   }
 
   rateAlbum = async (album, rating) => {
@@ -178,14 +185,19 @@ class DownloadList extends Component {
     }
 
     const downloadsToDisplay = this.props.downloads.map((download) =>
-      <Download key={download.id} album={download.album}/>
+      <Download key={download.id} album={download.album} status={download.status}/>
     );
+
+    const pendingDownloads = this.props.downloads.filter((download) => download.status === 'pending')
+    const readyDownloads = this.props.downloads.filter((download) => download.status === 'ready')
 
     return (
       <li className="nav-item dropdown">
         <a className="nav-link dropdown-toggle" href="#" id="downloadListMenuLink" data-toggle="dropdown"
            aria-haspopup="true" aria-expanded="false">
-          Downloads <span className="badge badge-warning">{this.props.downloads.length}</span>
+          Downloads
+          <DownloadCountBadge status='ready' downloads={readyDownloads}/>
+          <DownloadCountBadge status='pending' downloads={pendingDownloads}/>
         </a>
         <div className="dropdown-menu" aria-labelledby="downloadListMenuLink">
           {downloadsToDisplay}
@@ -195,12 +207,39 @@ class DownloadList extends Component {
   }
 }
 
+class DownloadStatusBadge extends Component {
+  render() {
+    const badge_type = this.props.status === 'ready' ? 'success' : 'warning'
+    const badge_class = "badge badge-" + badge_type
+
+    return (
+      <span className={badge_class}>{this.props.text}</span>
+    );
+  }
+}
+
+class DownloadCountBadge extends Component {
+  render() {
+    if (this.props.downloads.length === 0) {
+      return ''
+    }
+
+    return (
+      <span>
+        &nbsp;<DownloadStatusBadge status={this.props.status} text={this.props.downloads.length}/>
+      </span>
+    );
+  }
+}
+
 class Download extends Component {
   render() {
     const album = this.props.album;
+    const capitalised_status = this.props.status.charAt(0).toUpperCase() + this.props.status.substr(1)
+
     return (
       <a className="dropdown-item" href="#">
-        <span className="badge badge-warning">Pending</span> {album.artist} - {album.name}
+        <DownloadStatusBadge status={this.props.status} text={capitalised_status}/> {album.artist} - {album.name}
       </a>
     );
   }
