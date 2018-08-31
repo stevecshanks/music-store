@@ -34,7 +34,7 @@ class App extends Component {
       }))
       .catch(error => console.log(error));
 
-    this.socket.on('download ready', (data) => this.markDownloadAsReady(data['id']))
+    this.socket.on('download ready', (data) => this.markDownloadAsReady(data))
   }
 
   callApi = async (endpoint, method = 'GET', json = null) => {
@@ -79,6 +79,7 @@ class App extends Component {
           id: response['id'],
           album: album,
           status: 'pending',
+          url: '#',
         }
         return {downloads: [...state.downloads, download]}
       });
@@ -87,11 +88,12 @@ class App extends Component {
     }
   }
 
-  markDownloadAsReady(download_id) {
+  markDownloadAsReady(download) {
     this.setState((state, props) => {
-      const index = state.downloads.findIndex((element, index, array) => element.id === download_id)
+      const index = state.downloads.findIndex((element, index, array) => element.id === download.id)
       if (index !== -1) {
         state.downloads[index].status = 'ready'
+        state.downloads[index].url = download.url
       }
       return state
     });
@@ -185,7 +187,7 @@ class DownloadList extends Component {
     }
 
     const downloadsToDisplay = this.props.downloads.map((download) =>
-      <Download key={download.id} album={download.album} status={download.status}/>
+      <Download key={download.id} album={download.album} download={download}/>
     );
 
     const pendingDownloads = this.props.downloads.filter((download) => download.status === 'pending')
@@ -235,11 +237,12 @@ class DownloadCountBadge extends Component {
 class Download extends Component {
   render() {
     const album = this.props.album;
-    const capitalised_status = this.props.status.charAt(0).toUpperCase() + this.props.status.substr(1)
+    const download = this.props.download
+    const capitalised_status = download.status.charAt(0).toUpperCase() + download.status.substr(1)
 
     return (
-      <a className="dropdown-item" href="#">
-        <DownloadStatusBadge status={this.props.status} text={capitalised_status}/> {album.artist} - {album.name}
+      <a className="dropdown-item" href={download.url}>
+        <DownloadStatusBadge status={download.status} text={capitalised_status}/> {album.artist} - {album.name}
       </a>
     );
   }
