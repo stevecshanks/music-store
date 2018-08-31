@@ -1,5 +1,10 @@
 import os
 from flask import Flask
+from flask_socketio import SocketIO
+import eventlet
+
+
+socketio = SocketIO()
 
 
 def create_app(test_config=None):
@@ -16,6 +21,11 @@ def create_app(test_config=None):
     from store.models import db, migrate
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Required for SocketIO to use Redis without requests hanging
+    eventlet.monkey_patch()
+
+    socketio.init_app(app, message_queue=app.config['REDIS_URL'])
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

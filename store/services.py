@@ -5,6 +5,7 @@ import time
 import uuid
 from collections import namedtuple
 from flask import current_app
+from flask_socketio import SocketIO
 
 
 class DownloadService:
@@ -25,6 +26,10 @@ PendingDownload = namedtuple('PendingDownload', ['id'])
 def process_download(pending_download):
     # Don't actually care about doing any real work here, but look like we are...
     time.sleep(random.randint(5, 10))
+
+    socketio = SocketIO(message_queue=current_app.config['REDIS_URL'])
+    socketio.emit('download ready', {'id': pending_download.id})
+
     return True
 
 
