@@ -1,4 +1,4 @@
-version: "2"
+version: "2.2"
 services:
   app:
     image: app
@@ -37,6 +37,7 @@ services:
   download-worker:
     image: app
     command: python download_worker.py
+    scale: 3
     depends_on:
       - redis
     environment:
