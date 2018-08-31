@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import './App.css';
 
+import io from 'socket.io-client';
+
 const uuid = require('uuid/v4')
 
 const FILTER_ALL_ALBUMS = null
@@ -13,6 +15,7 @@ class App extends Component {
     this.setAlbumFilter = this.setAlbumFilter.bind(this)
     this.purchaseAlbum = this.purchaseAlbum.bind(this)
     this.downloadAlbum = this.downloadAlbum.bind(this)
+    this.markDownloadAsReady = this.markDownloadAsReady.bind(this)
     this.rateAlbum = this.rateAlbum.bind(this)
     this.dismissFlashMessage = this.dismissFlashMessage.bind(this)
     this.state = {
@@ -21,6 +24,7 @@ class App extends Component {
       messages: [],
       downloads: [],
     }
+    this.socket = io();
   }
 
   componentDidMount() {
@@ -29,6 +33,8 @@ class App extends Component {
         albums: response,
       }))
       .catch(error => console.log(error));
+
+    this.socket.on('download ready', (data) => this.markDownloadAsReady(data['id']))
   }
 
   callApi = async (endpoint, method = 'GET', json = null) => {
@@ -78,6 +84,10 @@ class App extends Component {
     } catch (err) {
       this.addFlashMessage('danger', err.message)
     }
+  }
+
+  markDownloadAsReady(download_id) {
+    console.log("Download ready:", download_id)
   }
 
   rateAlbum = async (album, rating) => {

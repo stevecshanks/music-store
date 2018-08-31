@@ -6,6 +6,7 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-scripts": "1.1.4",
+    "socket.io-client": "^2.1.1",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -14,5 +15,17 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://app:5000/"
+  "proxy": {
+    "/api": {
+      "target": "http://app:5000/"
+    },
+    "/sockjs-node": {
+      "target": "ws://app:5000/",
+      "ws": true
+    },
+    "/socket.io": {
+      "target": "ws://app:5000/",
+      "ws": true
+    }
+  }
 }
